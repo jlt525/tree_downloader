@@ -6,7 +6,7 @@ from os import path as ospath
 import wget
 
 ROOT = "https://www.shoarmateam.nl/upload/Lexus/IS200+IS300/"
-NO_MAKE_STACK = True
+NO_MAKE_STACK = False
 DEBUG = True
 WORKDIR = '/workdir/'
 LEAF_INDICATORS = [ ".pdf", ".txt", "wget", "a123", "ad54332", "a2345" ]
@@ -152,7 +152,7 @@ def populateTree(stack, absoluteWorkdir, stackFile = cwd() + "/.stack"):
             with open(stackFilePath, 'w') as stackFile:
                 for line in lines:
                     if line.strip('\n') != node:
-                        fw.write(line)
+                        stackFile.write(line)
 
 if __name__ == "__main__":
     main(ROOT)
