@@ -6,6 +6,7 @@ from os import path as ospath
 import wget
 
 ROOT = "https://www.shoarmateam.nl/upload/Lexus/IS200+IS300/"
+NO_MAKE_STACK = True
 DEBUG = True
 WORKDIR = '/workdir/'
 LEAF_INDICATORS = [ ".pdf", ".txt", "wget", "a123", "ad54332", "a2345" ]
@@ -23,19 +24,36 @@ def main(root):
         if DEBUG == True:
             print("Workdir exists:", absoluteWorkdir)
 
-    stack = urlStack(root, stackFile)
+    noMakeStack = NO_MAKE_STACK
+    stack = urlStack(root, noMakeStack)
 
     mkTreeSkeleton(stack, absoluteWorkdir)
 
     populateTree(stack, absoluteWorkdir)
 
-def urlStack(root, stackFile = cwd() + "/.stack"):
+def urlStack(root, noMakeStack = False, stackFile = cwd() + "/.stack"):
+    stackFilePath = str(stackFile)
     with urlopen(root) as html_src:
         soup = BeautifulSoup(html_src, 'html.parser')
         if DEBUG == True:
             print("got root:", root)
 
     stack = []
+
+    if ospath.exists(stackFile) == True:
+        if DEBUG == True:
+            print("Found stackfile:", stackFile)
+        with open(stackFilePath, 'r') as stackFile:
+            for line in stackFile:
+                stack.append(line)
+        if noMakeStack == True:
+            return stack
+    else:
+        if DEBUG == True:
+            print("Making stackfile:", stackFile)
+        with open(stackFilePath, 'w') as stackFile:
+            stackFile.write(root + "\n")
+
     stack.append(root)
 
     limit = len(stack)
@@ -62,6 +80,8 @@ def urlStack(root, stackFile = cwd() + "/.stack"):
                     if path not in url:
                         if not any(s for s in stack if path in s):
                             stack.append(url + a.get('href'))
+                            with open(stackFilePath, 'a+') as stackFile:
+                                stackFile.write(url + a.get('href') + "\n")
 
                             if DEBUG == True:
                                 print("pushed", url + a.get('href'), "to stack")
@@ -99,7 +119,10 @@ def mkTreeSkeleton(stack, absoluteWorkdir):
                 if DEBUG == True:
                     print("Directory exists:", absolutePath)
 
-def populateTree(stack, absoluteWorkdir):
+def populateTree(stack, absoluteWorkdir, stackFile = cwd() + "/.stack"):
+    stackFilePath = str(stackFile)
+    downloadLog = cwd() + "/.downloaded_files"
+
     for node in stack:
         if DEBUG == True:
             print("Stack position", stack.index(node), "-", node)
@@ -120,6 +143,16 @@ def populateTree(stack, absoluteWorkdir):
                 print("\tTo:", absolutePath)
 
             wget.download(node.replace("%20", " "), absolutePath)
+            stack.remove(node)
+            with open(downloadLog, 'a') as log:
+                log.write(node + "\n")
+
+            with open(stackFilePath, 'r') as stackFile:
+                lines = stackFile.readlines()
+            with open(stackFilePath, 'w') as stackFile:
+                for line in lines:
+                    if line.strip('\n') != node:
+                        fw.write(line)
 
 if __name__ == "__main__":
     main(ROOT)
