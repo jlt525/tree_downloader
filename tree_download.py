@@ -25,13 +25,13 @@ def main(root):
             print("Workdir exists:", absoluteWorkdir)
 
     noMakeStack = NO_MAKE_STACK
-    stack = urlStack(root, noMakeStack)
+    stack = mkUrlStack(root, noMakeStack)
 
     mkTreeSkeleton(stack, absoluteWorkdir)
 
     populateTree(stack, absoluteWorkdir)
 
-def urlStack(root, noMakeStack = False, stackFile = cwd() + "/.stack"):
+def mkUrlStack(root, noMakeStack = False, stackFile = cwd() + "/.stack"):
     stackFilePath = str(stackFile)
     with urlopen(root) as html_src:
         soup = BeautifulSoup(html_src, 'html.parser')
