@@ -108,7 +108,7 @@ def mkTreeSkeleton(stack, absoluteWorkdir):
             print("relative path:", relativePath)
 
         absolutePath = absoluteWorkdir + relativePath
-#        if str(relativePath).__contains__(".pdf") == False and str(relativePath).__contains__("wget") == False and str(relativePath).__contains__(".txt") == False and :
+
         if bool([element for element in LEAF_INDICATORS if(element in str(relativePath))]) == False:
             if ospath.exists(absolutePath) == False:
                 if DEBUG == True:
@@ -132,23 +132,25 @@ def populateTree(stack, absoluteWorkdir, stackFile = cwd() + "/.stack"):
             print("relative path:", relativePath)
 
         absolutePath = absoluteWorkdir + relativePath
-#        if str(relativePath[-4:]).__contains__(".pdf") == False and str(relativePath[-4:]) != "wget" and str(relativePath[-4:]).__contains__(".txt") == False:
-        if bool([element for element in LEAF_INDICATORS if(element in str(relativePath))]) == False:
-                if DEBUG == True:
-                    print("Node is a directory:", absolutePath)
 
-        else:
-            if DEBUG == True:
-                print("Downloading:", node)
-                print("\tTo:", absolutePath)
+        # if bool([element for element in LEAF_INDICATORS if(element in str(relativePath))]) == False:
+        #         if DEBUG == True:
+        #             print("Node is a directory:", absolutePath)
 
+        # else:
+        if DEBUG == True:
+            print("Downloading:", node)
+            print("\tTo:", absolutePath)
+
+        if ospath.exists(absolutePath) == False:
             wget.download(node.replace("%20", " "), absolutePath)
-            stack.remove(node)
-            with open(downloadLog, 'a') as log:
-                log.write(node + "\n")
 
-            with open(stackFilePath, 'r') as stackFile:
-                lines = stackFile.readlines()
+        stack.remove(node)
+        with open(downloadLog, 'a') as log:
+            log.write(node + "\n")
+
+        with open(stackFilePath, 'r') as stackFile:
+            lines = stackFile.readlines()
             with open(stackFilePath, 'w') as stackFile:
                 for line in lines:
                     if line.strip('\n') != node:
