@@ -101,6 +101,7 @@ def mkUrlStack(root, noMakeStack = False, downloadLog=cwd()+"/.downloaded_files"
 def mkTreeSkeleton(stack, absoluteWorkdir):
     for node in stack:
         if DEBUG == True:
+            print()
             print("Stack position", stack.index(node), "-", node)
 
         relativePath = node.replace(ROOT, "").replace("%20", " ")
@@ -123,9 +124,11 @@ def populateTree(stack, absoluteWorkdir, stackFile = cwd() + "/.stack"):
     stackFilePath = str(stackFile)
     downloadLog = cwd() + "/.downloaded_files"
 
-    for node in stack:
+    while len(stack) != 0:
+        node = stack.pop()
+
         if DEBUG == True:
-            print("Stack position", stack.index(node), "-", node)
+            print("Stack position", len(stack), "-", node)
 
         relativePath = node.replace(ROOT, "").replace("%20", " ")
         if DEBUG == True:
@@ -133,11 +136,6 @@ def populateTree(stack, absoluteWorkdir, stackFile = cwd() + "/.stack"):
 
         absolutePath = absoluteWorkdir + relativePath
 
-        # if bool([element for element in LEAF_INDICATORS if(element in str(relativePath))]) == False:
-        #         if DEBUG == True:
-        #             print("Node is a directory:", absolutePath)
-
-        # else:
         if DEBUG == True:
             print("Downloading:", node)
             print("\tTo:", absolutePath)
@@ -148,7 +146,6 @@ def populateTree(stack, absoluteWorkdir, stackFile = cwd() + "/.stack"):
             if DEBUG == True:
                 print("File already exists:", absolutePath)
 
-        stack.remove(node)
         with open(downloadLog, 'a') as log:
             log.write(node + "\n")
 
@@ -158,6 +155,7 @@ def populateTree(stack, absoluteWorkdir, stackFile = cwd() + "/.stack"):
                 for line in lines:
                     if line.strip('\n') != node:
                         stackFile.write(line)
+
 
 if __name__ == "__main__":
     main(ROOT)
