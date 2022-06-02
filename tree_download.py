@@ -6,7 +6,7 @@ from os import path as ospath
 import wget
 
 ROOT = "https://www.shoarmateam.nl/upload/Lexus/IS200+IS300/"
-NO_MAKE_STACK = False
+NO_MAKE_STACK = True
 DEBUG = True
 WORKDIR = '/workdir/'
 LEAF_INDICATORS = [ ".pdf", ".txt", "wget", "a123", "ad54332", "a2345" ]
@@ -31,7 +31,7 @@ def main(root):
 
     populateTree(stack, absoluteWorkdir)
 
-def mkUrlStack(root, noMakeStack = False, stackFile = cwd() + "/.stack"):
+def mkUrlStack(root, noMakeStack = False, downloadLog=cwd()+"/.downloaded_files", stackFile=cwd()+"/.stack"):
     stackFilePath = str(stackFile)
     with urlopen(root) as html_src:
         soup = BeautifulSoup(html_src, 'html.parser')
@@ -45,7 +45,7 @@ def mkUrlStack(root, noMakeStack = False, stackFile = cwd() + "/.stack"):
             print("Found stackfile:", stackFile)
         with open(stackFilePath, 'r') as stackFile:
             for line in stackFile:
-                stack.append(line)
+                stack.append(line.strip("\n"))
         if noMakeStack == True:
             return stack
     else:
@@ -144,6 +144,9 @@ def populateTree(stack, absoluteWorkdir, stackFile = cwd() + "/.stack"):
 
         if ospath.exists(absolutePath) == False:
             wget.download(node.replace("%20", " "), absolutePath)
+        else:
+            if DEBUG == True:
+                print("File already exists:", absolutePath)
 
         stack.remove(node)
         with open(downloadLog, 'a') as log:
